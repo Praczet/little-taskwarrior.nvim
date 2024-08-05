@@ -21,7 +21,7 @@ function M.initialize()
 	M.mdl_telescope.initialize(M.config)
 end
 
-function get_urgnet(limit)
+local function get_urgnet(limit)
 	local handle = io.popen("task status:pending and project:Me export ls limit:5")
 	local result = handle:read("*a")
 	handle:close()
