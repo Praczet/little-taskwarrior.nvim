@@ -27,11 +27,9 @@ end
 -- end
 
 function M.tasks_get_urgent(limit)
-	if limit == nil then
-		limit = M.config.dashboard_limit
-	end
-	if limit <= 0 then
-		limit = 5
+	local l_limit = M.config.dashboard_limit
+	if not limit == nil and limit > 0 then
+		limit = l_limit
 	end
 	print(limit)
 	-- return get_urgnet(limit)
