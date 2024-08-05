@@ -17,8 +17,6 @@ end
 
 function M.initialize()
 	utils.log_message("init.M.initialize", "Initializing Little Taskwarrior") -- Debug print
-	M.mdl_cmp.initialize(M.config)
-	M.mdl_telescope.initialize(M.config)
 end
 
 local function get_urgnet(limit)
