@@ -17,6 +17,7 @@ end
 
 function M.initialize()
 	-- utils.log_message("init.M.initialize", "Initializing Little Taskwarrior") -- Debug print
+	print("Initialize")
 end
 
 -- local function get_urgnet(limit)
