@@ -9,7 +9,7 @@ M.config = {
 }
 
 function M.setup(user_config)
-	utils.debug = M.debug
+	utils.debug = M.config.debug
 	utils.log_message("init.M.setup", "Setting up Little Taskwarrior") -- Debug print
 	M.config = vim.tbl_deep_extend("force", M.config, user_config or {})
 	M.initialize()

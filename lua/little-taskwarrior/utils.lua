@@ -13,6 +13,7 @@ function M.log_message(module_name, message)
 		file:close()
 	end
 end
+
 function M.parse_datetime(datetime_str)
 	-- Extract components using pattern matching
 	local year, month, day, hour, min, sec = datetime_str:match("(%d%d%d%d)(%d%d)(%d%d)T(%d%d)(%d%d)(%d%d)Z")
