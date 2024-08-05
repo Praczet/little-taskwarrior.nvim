@@ -28,7 +28,7 @@ end
 
 function M.tasks_get_urgent(limit)
 	local l_limit = M.config.dashboard_limit
-	if not limit == nil and limit > 0 then
+	if limit ~= nil and limit > 0 then
 		limit = l_limit
 	end
 	print(limit)
