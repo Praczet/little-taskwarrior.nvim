@@ -30,7 +30,7 @@ end
 
 function M.tasks_get_urgent(limit)
 	if limit == nil then
-		limit = M.dashboard_limit
+		limit = M.config.dashboard_limit
 	end
 	if limit <= 0 then
 		limit = 5
