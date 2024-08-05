@@ -19,12 +19,12 @@ function M.initialize()
 	-- utils.log_message("init.M.initialize", "Initializing Little Taskwarrior") -- Debug print
 end
 
-local function get_urgnet(limit)
-	local handle = io.popen("task status:pending and project:Me export ls limit:5")
-	local result = handle:read("*a")
-	handle:close()
-	return vim.fn.json_decode(result)
-end
+-- local function get_urgnet(limit)
+-- 	local handle = io.popen("task status:pending and project:Me export ls limit:5")
+-- 	local result = handle:read("*a")
+-- 	handle:close()
+-- 	return vim.fn.json_decode(result)
+-- end
 
 function M.tasks_get_urgent(limit)
 	if limit == nil then
