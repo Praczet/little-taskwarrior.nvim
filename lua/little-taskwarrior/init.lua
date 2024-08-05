@@ -1,5 +1,5 @@
 local M = {}
-local utils = require("little-taskwarrior.utils")
+-- local utils = require("little-taskwarrior.utils")
 
 -- Default configuration
 M.config = {
@@ -9,14 +9,14 @@ M.config = {
 }
 
 function M.setup(user_config)
-	utils.debug = M.config.debug
-	utils.log_message("init.M.setup", "Setting up Little Taskwarrior") -- Debug print
+	-- utils.debug = M.config.debug
+	-- utils.log_message("init.M.setup", "Setting up Little Taskwarrior") -- Debug print
 	M.config = vim.tbl_deep_extend("force", M.config, user_config or {})
 	M.initialize()
 end
 
 function M.initialize()
-	utils.log_message("init.M.initialize", "Initializing Little Taskwarrior") -- Debug print
+	-- utils.log_message("init.M.initialize", "Initializing Little Taskwarrior") -- Debug print
 end
 
 local function get_urgnet(limit)
