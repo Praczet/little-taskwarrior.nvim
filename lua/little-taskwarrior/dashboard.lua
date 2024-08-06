@@ -25,6 +25,9 @@ M.hl = {
 	},
 }
 
+---Check if the current buffor directroy contains a project.json, if so,
+---it return project name
+---@return nil
 local function get_project()
 	local content = utils.read_file(M.config.project_info)
 	if content == nil then
@@ -37,6 +40,10 @@ local function get_project()
 	return json.project
 end
 
+---Clips text to given width and if the text is longer than given width it will add "..."
+---@param text string text to clip
+---@param width number max width that text can have
+---@return string text Clipped text
 local function clip_text(text, width)
 	if #text > width then
 		text = text:sub(1, width - 3) .. "..."
