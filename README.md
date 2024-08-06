@@ -163,7 +163,7 @@ For example:
 If it succeeds it will use it as project name therefore the display mode will be
 switched to project specific mode. Which means the first task will be taken for
 that specific project. And then (if configuration allows) other tasks will be
-loaded. You can see this in [Tasks list with a project file][### Tasks list with a project file]
+loaded. You can see this in [Tasks list with a project file](### Tasks list with a project file)
 
 ## TODO
 
