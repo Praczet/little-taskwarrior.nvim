@@ -1,5 +1,23 @@
 local M = {}
 M.debug = true
+--
+-- Function to read file contents
+function M.read_file(path)
+	local file = io.open(path, "r")
+	if not file then
+		return nil
+	end
+	local content = file:read("*a")
+	file:close()
+	return content
+end
+
+function M.merge_arrays(a, b)
+	local result = {}
+	table.move(a, 1, #a, 1, result)
+	table.move(b, 1, #b, #a + 1, result)
+	return result
+end
 
 function M.log_message(module_name, message)
 	if not M.debug then
@@ -34,6 +52,26 @@ function M.parse_datetime(datetime_str)
 	-- Convert the table to a timestamp
 	local timestamp = os.time(datetime_table)
 	return timestamp
+end
+
+function M.get_os_date(datetime_str, format_str)
+	if not format_str then
+		format_str = "%Y-%m-%d %H:%M:%S"
+	end
+	return os.date(format_str, M.parse_datetime(datetime_str))
+end
+
+function M.sort_by_column(tasks, column, order)
+	if order == nil then
+		order = "desc"
+	end
+	table.sort(tasks, function(a, b)
+		if order == "desc" then
+			return a[column] > b[column]
+		else
+			return a[column] < b[column]
+		end
+	end)
 end
 
 return M
