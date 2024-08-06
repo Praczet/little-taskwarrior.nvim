@@ -14,7 +14,7 @@ For now this plugin offers the following features:
 
 ### Tasks list without project file
 
-![Tasks list without project file](assets/src-all.png)
+![Tasks list without project file](assets/scr-all.png)
 
 ### Tasks list with a project file
 
