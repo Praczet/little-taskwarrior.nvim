@@ -43,6 +43,10 @@ function M.get_dashboard_tasks()
 	return dashboard.get_lines()
 end
 
+function M.test()
+	tasks.display_tasks()
+end
+
 ---Setting utlis, tasks and dashboard
 ---@param user_config any
 function M.setup(user_config)
