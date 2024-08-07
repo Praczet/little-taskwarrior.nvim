@@ -47,7 +47,7 @@ function M.display_tasks()
 	local formatted_output = { "" }
 
 	-- Set the contents of the output buffer
-	vim.api.nvim_buf_set_lines(output_buf, 0, -1, false, formatted_output)
+	-- vim.api.nvim_buf_set_lines(output_buf, 0, -1, false, formatted_output)
 	--
 	local lines_displayed = vim.api.nvim_win_get_height(0)
 	local row = math.floor(lines_displayed * 0.1) + 1
