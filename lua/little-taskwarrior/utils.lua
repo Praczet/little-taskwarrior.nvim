@@ -38,6 +38,19 @@ function M.replace_project_name(project_name, project_replacements)
 	end
 	return project_name
 end
+---
+--- Slices a table from start index to end index
+---@param tbl table The input table
+---@param start_index number The starting index
+---@param end_index number The ending index
+---@return table result The sliced portion of the table
+function M.slice(tbl, start_index, end_index)
+	local result = {}
+	for i = start_index, end_index do
+		table.insert(result, tbl[i])
+	end
+	return result
+end
 
 function M.parse_datetime(datetime_str)
 	-- Extract components using pattern matching
