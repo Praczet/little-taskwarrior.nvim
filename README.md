@@ -66,6 +66,11 @@ M.config = {
    "due",
    "urgency",
   },
+  --- List of replacements when getting lines for dashboard
+  project_replacements = {
+   ["work."] = "w.",
+   ["personal."] = "p.",
+  },
  },
  --- toggle the loggin
  debug = true,
@@ -165,8 +170,41 @@ switched to project specific mode. Which means the first task will be taken for
 that specific project. And then (if configuration allows) other tasks will be
 loaded. You can see this in [Tasks list with a project file](###Tasks list with a project file)
 
+### project_replacements
+
+This configuration requires a little explanation. The best explanation I can
+give will be by example.
+Let's assume that we have projects related to `work` and several projects
+related to `personal`.
+In the `personal` project we have projects like:
+
+- `personal.dashboard-nvim`
+- `personal.little-taskwarrior`
+
+So task could look like this:
+
+```bash
+task add "I need to do something" project:personal.dashboard-nvim
+```
+
+But instead of displaying `personal.dashboard-nvim` we want to display
+`p.dashboard-nvim`
+
+Then we can add replacements in the configuration:
+
+```lua
+ project_replacements = {
+   ["work."] = "w.",
+   ["personal."] = "p.",
+  },
+```
+
+> [!note]
+> Replacements can by as regular expression
+
 ## TODO
 
+- [ ] feat: Shortening project names by separator
 - [ ] feat: List of task in Telescope
 - [ ] feat: Highlight urgent tasks
 - [ ] feat: Preview task

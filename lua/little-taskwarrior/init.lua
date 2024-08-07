@@ -23,6 +23,7 @@ M.config = {
 			"due",
 			"urgency",
 		},
+		--- List of replacements when getting lines for dashboard
 		project_replacements = {
 			["work."] = "w.",
 			["personal."] = "p.",
