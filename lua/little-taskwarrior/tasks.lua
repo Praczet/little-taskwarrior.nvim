@@ -69,6 +69,11 @@ function M.display_tasks()
 	-- Open a new floating window with the output buffer
 	vim.api.nvim_open_win(output_buf, true, opts)
 
+	-- Set the terminal buffer to use the 'task' command
+	vim.fn.termopen("task")
+
+	-- Start insert mode in the terminal
+	vim.cmd("startinsert")
 	-- Switch back to the original buffer
 	-- vim.api.nvim_set_current_buf(current_buf)
 end
