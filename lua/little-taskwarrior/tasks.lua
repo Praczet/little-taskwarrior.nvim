@@ -34,21 +34,34 @@ function M.tasks_get_urgent(limit, project, exclude)
 	return get_urgnet(limit, project, exclude)
 end
 
+local function setup_commands()
+	-- vim.api.nvim_create_user_command("Task", function(opts)
+	-- 	require("little-taskwarrior.tasks").display_tasks(unpack(opts.fargs))
+	-- end, { nargs = "*", complete = "custom,v:lua.complete_task_args" })
+	-- _G.complete_task_args = function(arglead, cmdline, cursorpos)
+	-- 	-- Provide a list of taskwarrior arguments for completion
+	-- 	return { "project:work", "status:pending", "priority:H", "due.before:today", "tag:home" }
+	-- end
+	vim.api.nvim_create_user_command("Task", function(opts)
+		require("little-taskwarrior.tasks").display_tasks(unpack(opts.fargs))
+	end, { nargs = "*" })
+end
+
 function M.setup(user_config)
 	utils.log_message("tasks.M.setup", "Setting up Tassks")
 	M.config = vim.tbl_deep_extend("force", M.config, user_config or {})
+	setup_commands()
 end
 
-function M.display_tasks()
+function M.display_tasks(...)
+	local args = { ... }
+	local cmd = "task"
+	for _, arg in ipairs(args) do
+		cmd = cmd .. " " .. arg
+	end
 	-- Create a new buffer for the output
 	local output_buf = vim.api.nvim_create_buf(false, true)
 
-	-- Get the formatted output as a string
-	local formatted_output = { "" }
-
-	-- Set the contents of the output buffer
-	-- vim.api.nvim_buf_set_lines(output_buf, 0, -1, false, formatted_output)
-	--
 	local lines_displayed = vim.api.nvim_win_get_height(0)
 	local row = math.floor(lines_displayed * 0.1) + 1
 	local col = math.floor(vim.o.columns * 0.1)
@@ -67,15 +80,18 @@ function M.display_tasks()
 	}
 
 	-- Open a new floating window with the output buffer
-	vim.api.nvim_open_win(output_buf, true, opts)
+	local win_id = vim.api.nvim_open_win(output_buf, true, opts)
 
 	-- Set the terminal buffer to use the 'task' command
-	vim.fn.termopen("task")
-
+	vim.fn.termopen(cmd .. " & read", {
+		on_exit = function(_, _, _)
+			utils.log_message("tasks.M.display_tasks", "on_exit")
+			vim.api.nvim_win_close(win_id, true)
+			vim.api.nvim_buf_delete(output_buf, { force = true })
+		end,
+	})
 	-- Start insert mode in the terminal
 	vim.cmd("startinsert")
-	-- Switch back to the original buffer
-	-- vim.api.nvim_set_current_buf(current_buf)
 end
 
 return M
