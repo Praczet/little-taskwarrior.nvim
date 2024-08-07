@@ -39,4 +39,38 @@ function M.setup(user_config)
 	M.config = vim.tbl_deep_extend("force", M.config, user_config or {})
 end
 
+function M.display_tasks()
+	-- Create a new buffer for the output
+	local output_buf = vim.api.nvim_create_buf(false, true)
+
+	-- Get the formatted output as a string
+	local formatted_output = { "" }
+
+	-- Set the contents of the output buffer
+	vim.api.nvim_buf_set_lines(output_buf, 0, -1, false, formatted_output)
+	--
+	local lines_displayed = vim.api.nvim_win_get_height(0)
+	local row = math.floor(lines_displayed * 0.1) + 1
+	local col = math.floor(vim.o.columns * 0.1)
+
+	-- Set the options for the new window
+	local opts = {
+		relative = "editor",
+		row = row,
+		col = col,
+		width = math.floor(vim.o.columns * 0.8),
+		height = math.floor(lines_displayed * 0.8),
+		style = "minimal",
+		border = "rounded",
+		title = "Tasks",
+		title_pos = "center",
+	}
+
+	-- Open a new floating window with the output buffer
+	vim.api.nvim_open_win(output_buf, true, opts)
+
+	-- Switch back to the original buffer
+	-- vim.api.nvim_set_current_buf(current_buf)
+end
+
 return M
