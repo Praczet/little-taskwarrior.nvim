@@ -38,7 +38,7 @@ function M.replace_project_name(project_name, project_replacements)
 	end
 	return project_name
 end
----
+
 --- Slices a table from start index to end index
 ---@param tbl table The input table
 ---@param start_index number The starting index

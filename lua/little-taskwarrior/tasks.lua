@@ -11,7 +11,7 @@ local function get_urgnet(limit, project, exlude)
 			prj_string = "and project:" .. project
 		end
 	end
-	local cmd = string.format("task status:pending %s export ls limit:%s", prj_string, limit)
+	local cmd = string.format("task status:pending %s export ls ", prj_string)
 	local handle = io.popen(cmd)
 	if handle == nil then
 		return {}
@@ -21,7 +21,9 @@ local function get_urgnet(limit, project, exlude)
 	if result == nil then
 		return {}
 	end
-	return vim.fn.json_decode(result)
+	local tasks = vim.fn.json_decode(result)
+	utils.sort_by_column(tasks, "urgency")
+	return utils.slice(tasks, 1, limit)
 end
 
 function M.tasks_get_urgent(limit, project, exclude)

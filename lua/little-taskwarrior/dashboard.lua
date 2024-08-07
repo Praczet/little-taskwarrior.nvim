@@ -145,8 +145,6 @@ end
 function M.get_lines()
 	local lines = {}
 	local task_list, other_tasks = M.get_tasks()
-	utils.sort_by_column(task_list, "urgency")
-	utils.sort_by_column(other_tasks, "urgency")
 	local columnsWidth = get_columns_width(task_list, other_tasks)
 
 	for _, task in ipairs(task_list) do
