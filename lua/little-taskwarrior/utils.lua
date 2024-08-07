@@ -32,6 +32,13 @@ function M.log_message(module_name, message)
 	end
 end
 
+function M.replace_project_name(project_name, project_replacements)
+	for pattern, replacement in pairs(project_replacements) do
+		project_name = project_name:gsub(pattern, replacement)
+	end
+	return project_name
+end
+
 function M.parse_datetime(datetime_str)
 	-- Extract components using pattern matching
 	local year, month, day, hour, min, sec = datetime_str:match("(%d%d%d%d)(%d%d)(%d%d)T(%d%d)(%d%d)(%d%d)Z")

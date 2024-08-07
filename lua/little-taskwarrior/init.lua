@@ -23,6 +23,10 @@ M.config = {
 			"due",
 			"urgency",
 		},
+		project_replacements = {
+			["work."] = "w.",
+			["personal."] = "p.",
+		},
 	},
 	--- toggle the loggin
 	debug = true,
