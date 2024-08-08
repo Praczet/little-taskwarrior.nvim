@@ -29,6 +29,8 @@ M.config = {
 			["personal."] = "p.",
 		},
 	},
+	--- function to reload dashboard config
+	get_dashboard_config = nil,
 	--- toggle the loggin
 	debug = true,
 	--- where information about taskwarrior poject can be found
@@ -47,12 +49,20 @@ function M.test()
 	tasks.display_tasks()
 end
 
+function M.get_dashboard_config()
+	if M.config and M.config.get_dashboard_config then
+		return M.config.get_dashboard_config()
+	end
+	return nil
+end
+
 ---Setting utlis, tasks and dashboard
 ---@param user_config any
 function M.setup(user_config)
+	M.config = vim.tbl_deep_extend("force", M.config, user_config or {})
 	utils.debug = M.config.debug
 	utils.log_message("init.M.setup", "Setting up Little Taskwarrior") -- Debug print
-	M.config = vim.tbl_deep_extend("force", M.config, user_config or {})
+	utils.get_dashboard_config = M.config.get_dashboard_config
 	tasks.setup(M.config)
 	dashboard.setup(M.config)
 	M.initialize()

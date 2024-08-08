@@ -1,5 +1,6 @@
 local M = {}
 M.debug = true
+M.get_dashboard_config = nil
 --
 -- Function to read file contents
 function M.read_file(path)
@@ -26,6 +27,16 @@ function M.is_dashboard_open()
 	end
 
 	return false
+end
+
+function M.refresh_dashboard()
+	if M.is_dashboard_open() and M.get_dashboard_config and type(M.get_dashboard_config) == "function" then
+		local bufnr = vim.api.nvim_get_current_buf()
+		vim.api.nvim_buf_delete(bufnr, { force = true })
+		local _dashboard = require("dashboard")
+		_dashboard.setup(M.get_dashboard_config())
+		_dashboard:instance()
+	end
 end
 
 function M.merge_arrays(a, b)

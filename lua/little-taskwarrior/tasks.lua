@@ -88,6 +88,11 @@ function M.display_tasks(...)
 			utils.log_message("tasks.M.display_tasks", "on_exit")
 			vim.api.nvim_win_close(win_id, true)
 			vim.api.nvim_buf_delete(output_buf, { force = true })
+			if utils.is_dashboard_open() then
+				-- refresh dashboard
+				utils.refresh_dashboard()
+			else
+			end
 		end,
 	})
 	-- Start insert mode in the terminal
