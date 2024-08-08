@@ -59,9 +59,30 @@ function M.log_message(module_name, message)
 	end
 end
 
-function M.replace_project_name(project_name, project_replacements)
-	for pattern, replacement in pairs(project_replacements) do
-		project_name = project_name:gsub(pattern, replacement)
+--- Escapes special characters in a pattern
+local function escape_pattern(text)
+	return text:gsub("([^%w])", "%%%1")
+end
+
+function M.replace_project_name(project_name, config)
+	if config and config.project_replacements then
+		for pattern, replacement in pairs(config.project_replacements) do
+			project_name = project_name:gsub(pattern, replacement)
+		end
+	end
+
+	if config and config.shorten_sections then
+		local sep = config.sec_sep
+		local escaped_sep = escape_pattern(sep)
+		local pattern = "[^" .. escaped_sep .. "]+"
+		local parts = {}
+		for part in project_name:gmatch(pattern) do
+			table.insert(parts, part)
+		end
+		for i = 1, #parts - 1 do
+			parts[i] = parts[i]:sub(1, 1)
+		end
+		project_name = table.concat(parts, sep)
 	end
 	return project_name
 end

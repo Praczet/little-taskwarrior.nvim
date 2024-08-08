@@ -89,7 +89,7 @@ local function sanitize_task(task)
 				local new_date_string = date_string:match(pattern)
 				task[k] = new_date_string or date_string
 			elseif k == "project" then
-				task[k] = utils.replace_project_name(v, M.config.dashboard.projects_replacements)
+				task[k] = utils.replace_project_name(v, M.config.dashboard)
 			end
 		else
 			task[k] = ""

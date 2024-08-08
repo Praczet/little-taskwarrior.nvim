@@ -28,6 +28,8 @@ M.config = {
 			["work."] = "w.",
 			["personal."] = "p.",
 		},
+		sec_sep = ".", -- Define your section separator here
+		shorten_sections = true, -- Enable or disable section shortening
 	},
 	--- function to reload dashboard config
 	get_dashboard_config = nil,
