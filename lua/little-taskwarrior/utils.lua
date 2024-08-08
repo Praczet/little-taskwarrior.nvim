@@ -12,6 +12,22 @@ function M.read_file(path)
 	return content
 end
 
+-- Function to check if the Dashboard buffer is open
+function M.is_dashboard_open()
+	-- Get the current buffer name
+	local bufname = vim.api.nvim_buf_get_name(0)
+
+	-- Get the current buffer filetype
+	local buftype = vim.bo.filetype
+
+	-- Check if the buffer name contains 'dashboard' or filetype is 'dashboard'
+	if string.match(bufname, "dashboard") or buftype == "dashboard" then
+		return true
+	end
+
+	return false
+end
+
 function M.merge_arrays(a, b)
 	local result = {}
 	table.move(a, 1, #a, 1, result)
