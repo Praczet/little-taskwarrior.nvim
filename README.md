@@ -72,6 +72,8 @@ M.config = {
    ["personal."] = "p.",
   },
  },
+ --- function to reload dashboard config
+ get_dashboard_config = nil,
  --- toggle the loggin
  debug = true,
  --- where information about taskwarrior project can be found
@@ -105,6 +107,12 @@ lua print(vim.inspect(require("little-taskwarrior").get_dashboard_tasks()))
 ```
 
 ### Integration with Dashboard-nvim
+
+#### Static
+
+> [!important]
+> This method will display Tasks in the Dashboard but it will not allow to refresh
+> task list after command `Task`
 
 Based on my dashboard.lua config (I am using LazyVim)
 
@@ -151,6 +159,178 @@ return {
   },
 }
 ```
+
+#### Dynamic
+
+> [!important]
+> It will enable refreshing the task list after command `Task`, but it requires some
+> steps
+
+Since `dashboard-nvim` does not support refreshing header you can use
+`config.get_dashboard_config`. Like this:
+
+```lua
+{
+  "praczet/little-taskwarrior.nvim",
+  config = function()
+    require("little-taskwarrior").setup({
+      get_dashboard_config = function()
+        -- here function that will return options for dashboard
+        -- the same as in dashboard-nvim setup.
+      local ltw = require("little-taskwarrior")
+      local tasks = ltw.get_dashboard_tasks()
+
+      local logo = [[
+
+...:::...
+..   ---   ..
+.    (0 0)    .
+.     \=/     .
+.-----------------.
+(      ©ad.art      )
+'''''''''''''''''''
+    ]]
+      local currentDate = os.date("%Y-%m-%d")
+      local padding = math.floor((10 - #currentDate) / 2)
+      local centeredDate = string.rep(" ", padding) .. currentDate
+      logo = logo .. "\n" .. centeredDate .. "\n"
+      local header = vim.split(logo, "\n")
+      if tasks ~= nil then
+        for _, t in ipairs(tasks) do
+          table.insert(header, t)
+        end
+        table.insert(header, "")
+      end
+
+      local opts = {
+        theme = "doom",
+        config = {
+          header = header,
+          -- ... There is more like center, footer etc.
+        },
+      }
+      return opts
+    end,
+      end
+    })
+  end,
+}
+```
+
+This will enable refreshing after `Task` command.
+
+Now you can change configuration of `dashboard-nvim` plugin, like this:
+
+```lua
+return {
+  {
+    "nvimdev/dashboard-nvim",
+    opts = require('little-taskwarrior').get_dashboard_config
+  }
+}
+```
+
+> [!warning]
+> This mostly works, but sometimes `little-taskwarrior` was taking too long to
+> load and then `dashboard-nvim` loaded the default one (in my case LazyVim).
+
+##### Workaround - a kind of solution
+
+There are many ways to solve it. For example you can put for your `dashboard-nvim`
+config the function as usual, and then the same function in
+`little-taskwarrior`. I do not like this (in two places the same code). It
+forces me to remember to change it in two places.
+
+I suggest this (solution for LazyVim):
+
+1. Add a file `fallback.lua` in `~/.config/nvim/lua/`
+
+   ```lua
+   local function fall_back()
+     local next = require("next-birthday")
+     local lines = next.birthdays("now")
+
+     local ltw = require("little-taskwarrior")
+     local tasks = ltw.get_dashboard_tasks()
+     local logo = [[
+
+      ...:::...
+      ..   ---   ..
+      .    (0 0)    .
+      .     \=/     .
+      .-----------------.
+      (      ©ad.art      )
+      '''''''''''''''''''
+      ]]
+      local currentDate = os.date("%Y-%m-%d")
+      local padding = math.floor((10 - #currentDate) / 2)
+      local centeredDate = string.rep(" ", padding) .. currentDate
+      logo = logo .. "\n" .. centeredDate .. "\n"
+      local header = vim.split(logo, "\n")
+      if lines ~= nil then
+        for _, l in ipairs(lines) do
+          table.insert(header, l)
+        end
+      end
+      table.insert(header, "")
+
+      if tasks ~= nil then
+        for _, t in ipairs(tasks) do
+          table.insert(header, t)
+        end
+        table.insert(header, "")
+      end
+
+      local opts = {
+        theme = "doom",
+        hide = {
+          -- this is taken care of by lualine
+          -- enabling this messes up the actual laststatus setting after loading a file
+          statusline = false,
+      },
+        config = {
+          header = header,
+            -- stylua: ignore
+       }
+     }
+    return opts
+    end
+
+    return {
+      fall_back = fall_back,
+    }
+   ```
+
+2. In the `dashboard-nvim` config use like this:
+
+   ```lua
+    --- this file contains my own Dashboard config
+    local dashboard_config = require("fallback")
+    return {
+      {
+        "nvimdev/dashboard-nvim",
+        opts = dashboard_config.fall_back,
+      },
+    }
+   ```
+
+3. In the `little-taskwarrior` config use like this:
+
+   ```lua
+    local dashboard_config = require("fallback")
+    return {
+      {
+        "praczet/little-taskwarrior.nvim",
+        config = function()
+          require("little-taskwarrior").setup({
+            get_dashboard_config = dashboard_config.fall_back,
+          })
+        end,
+      },
+    }
+   ```
+
+You can see my config files in `config` folder of my repository.
 
 ### Project file or not
 
