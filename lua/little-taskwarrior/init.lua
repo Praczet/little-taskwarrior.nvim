@@ -38,7 +38,7 @@ M.config = {
 	--- where information about taskwarrior poject can be found
 	project_info = ".little-taskwarrior.json",
 	--- not uset yet (the idea is to mark task about this)
-	urgency_threshold = 9,
+	urgency_threshold = 8,
 }
 
 ---Gets list of lines with tasks

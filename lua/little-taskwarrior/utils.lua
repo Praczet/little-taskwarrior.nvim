@@ -99,7 +99,18 @@ function M.slice(tbl, start_index, end_index)
 	end
 	return result
 end
-
+local function trim(s)
+	return (s:gsub("^%s*(.-)%s*$", "%1"))
+end
+function M.in_table(lines_table, target_line)
+	target_line = trim(target_line)
+	for _, line in ipairs(lines_table) do
+		if line == target_line then
+			return true
+		end
+	end
+	return false
+end
 function M.parse_datetime(datetime_str)
 	-- Extract components using pattern matching
 	local year, month, day, hour, min, sec = datetime_str:match("(%d%d%d%d)(%d%d)(%d%d)T(%d%d)(%d%d)(%d%d)Z")

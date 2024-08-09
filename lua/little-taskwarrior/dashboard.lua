@@ -1,6 +1,9 @@
 local M = {}
 local utils = require("little-taskwarrior.utils")
 local tasks = require("little-taskwarrior.tasks")
+local ltw_urgency_hlnr = nil
+local urgent_lines = {}
+local not_urgent_lines = {}
 M.config = {
 	dashboard = {
 		limit = 5,
@@ -19,13 +22,13 @@ M.config = {
 			["personal."] = "p.",
 		},
 	},
-	urgency_threshold = 9,
+	urgency_threshold = 8,
 }
 M.project = nil
 M.hl = {
 	urgency = {
-		name = "LittleTaskWarriorUrgency",
-		color = "#ff0000",
+		bg = "#ff0000",
+		fg = "White",
 	},
 }
 
@@ -159,7 +162,20 @@ function M.get_lines()
 	local columnsWidth = get_columns_width(task_list, other_tasks)
 
 	for _, task in ipairs(task_list) do
-		table.insert(lines, parse_line(task, columnsWidth))
+		local line = parse_line(task, columnsWidth)
+		utils.log_message("dashboard.M.get_lines", "task.urgency: " .. tonumber(task.urgency))
+		if
+			task.urgency ~= nil
+			and M.config.urgency_threshold ~= nil
+			and tonumber(task.urgency) >= M.config.urgency_threshold
+		then
+			utils.log_message("dashboard.M.get_lines", "Adding urgent line")
+			table.insert(urgent_lines, line)
+		else
+			utils.log_message("dashboard.M.get_lines", "Adding not urgent line")
+			table.insert(not_urgent_lines, line)
+		end
+		table.insert(lines, line)
 	end
 
 	if #other_tasks > 0 and M.project and #task_list > 0 then
@@ -167,15 +183,78 @@ function M.get_lines()
 	end
 
 	for _, task in ipairs(other_tasks) do
-		table.insert(lines, parse_line(task, columnsWidth))
+		local line = parse_line(task, columnsWidth)
+		utils.log_message("dashboard.M.get_lines", "task.urgency: " .. tonumber(task.urgency))
+		if
+			task.urgency ~= nil
+			and M.config.urgency_threshold ~= nil
+			and tonumber(task.urgency) >= M.config.urgency_threshold
+		then
+			utils.log_message("dashboard.M.get_lines", "Adding urgent line")
+			table.insert(urgent_lines, line)
+		else
+			utils.log_message("dashboard.M.get_lines", "Adding not urgent line")
+			table.insert(not_urgent_lines, line)
+		end
+		table.insert(lines, line)
 	end
 	return lines
+end
+
+local function setup_hl_groups()
+	local hl = vim.api.nvim_get_hl(0, { name = "@keyword" })
+	vim.api.nvim_set_hl(0, "LTWDashboardHeaderUrgent", {
+		-- bg = "Yellow",
+		-- fg = "Red",
+		-- sp = "Yellow",
+		-- undercurl = true,
+		bg = hl.bg,
+		fg = hl.fg,
+		cterm = hl.cterm,
+		bold = hl.bold,
+		italic = hl.italic,
+		reverse = hl.reverse,
+	})
+	hl = vim.api.nvim_get_hl(0, { name = "Comment" })
+	vim.api.nvim_set_hl(0, "LTWDashboardHeader", {
+		bg = hl.bg,
+		fg = hl.fg,
+		cterm = hl.cterm,
+		bold = hl.bold,
+		italic = hl.italic,
+		reverse = hl.reverse,
+	})
+end
+
+local function hl_tasks()
+	setup_hl_groups()
+	local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+	utils.log_message("dashboard.hl_tasks", "Lines: " .. vim.inspect(urgent_lines))
+	for i, line in ipairs(lines) do
+		if utils.in_table(urgent_lines, line) then
+			vim.api.nvim_buf_add_highlight(0, -1, "LTWDashboardHeaderUrgent", i - 1, 0, -1)
+		elseif utils.in_table(not_urgent_lines, line) then
+			vim.api.nvim_buf_add_highlight(0, -1, "LTWDashboardHeader", i - 1, 0, -1)
+		end
+	end
 end
 
 function M.setup(user_config)
 	utils.log_message("dashboard.M.setup", "Setting up Dashboard")
 	M.config = vim.tbl_deep_extend("force", M.config, user_config or {})
 	M.project = get_project()
+	vim.api.nvim_create_autocmd("User", {
+		pattern = "DashboardLoaded",
+		callback = hl_tasks,
+	})
+	-- vim.api.nvim_create_autocmd({ "BufWipeout" }, {
+	-- 	buffer = 0, -- Use 0 to apply to the current buffer
+	-- 	callback = function()
+	-- 		if vim.api.nvim_get_current_buf() == dashboard_bffnr then
+	-- 			clear_dashboard_highlight()
+	-- 		end
+	-- 	end,
+	-- })
 end
 
 return M
