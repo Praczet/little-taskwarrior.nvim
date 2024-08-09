@@ -63,6 +63,7 @@ end
 function M.setup(user_config)
 	M.config = vim.tbl_deep_extend("force", M.config, user_config or {})
 	utils.debug = M.config.debug
+	utils.log_message("init.M.setup", "------------------------------------")
 	utils.log_message("init.M.setup", "Setting up Little Taskwarrior") -- Debug print
 	utils.get_dashboard_config = M.config.get_dashboard_config
 	tasks.setup(M.config)

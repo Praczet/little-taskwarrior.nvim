@@ -123,9 +123,11 @@ function M.parse_datetime(datetime_str)
 end
 
 function M.get_os_date(datetime_str, format_str)
+	M.log_message("utils.M.get_os_date", "datetime_str: " .. datetime_str)
 	if not format_str then
 		format_str = "%Y-%m-%d %H:%M:%S"
 	end
+	M.log_message("utils.M.get_os_date", "format_str: " .. format_str)
 	return os.date(format_str, M.parse_datetime(datetime_str))
 end
 

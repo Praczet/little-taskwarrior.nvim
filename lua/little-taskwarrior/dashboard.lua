@@ -83,6 +83,7 @@ local function sanitize_task(task)
 			if k == "urgency" then
 				task[k] = string.format("%.2f", v)
 			elseif k == "due" then
+				utils.log_message("dashboard.sanitize_task", "[" .. task["id"] .. "]" .. "due (v): " .. v)
 				local current_year = os.date("%Y")
 				local pattern = "^" .. current_year .. "%-(.*)"
 				local date_string = tostring(utils.get_os_date(v, "%Y-%m-%d"))
@@ -98,22 +99,31 @@ local function sanitize_task(task)
 	return task
 end
 
+local function sanitize_tasks(task_list)
+	for _, task in ipairs(task_list) do
+		task = sanitize_task(task)
+	end
+end
+
 local function get_columns_width(task_list, other_tasks)
+	utils.log_message("dashboard.get_columns_width", "Getting columns width")
 	local columnsWidth = {}
 	local max_width = M.config.dashboard.max_width
 	local needed_for_padding = #M.config.dashboard.columns
 	local total_width = 0
+	sanitize_tasks(task_list)
+	sanitize_tasks(other_tasks)
 	for _, column in ipairs(M.config.dashboard.columns) do
 		columnsWidth[column] = 0
 		for _, task in ipairs(task_list) do
 			if task[column] ~= nil then
-				task = sanitize_task(task)
+				-- task = sanitize_task(task)
 				columnsWidth[column] = math.max(columnsWidth[column], #tostring(task[column]))
 			end
 		end
 		for _, task in ipairs(other_tasks) do
 			if task[column] ~= nil then
-				task = sanitize_task(task)
+				-- task = sanitize_task(task)
 				columnsWidth[column] = math.max(columnsWidth[column], #tostring(task[column]))
 			end
 		end
@@ -143,6 +153,7 @@ function M.get_tasks()
 end
 
 function M.get_lines()
+	utils.log_message("dashboard.M.get_lines", "Getting lines")
 	local lines = {}
 	local task_list, other_tasks = M.get_tasks()
 	local columnsWidth = get_columns_width(task_list, other_tasks)
