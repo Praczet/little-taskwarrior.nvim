@@ -1,15 +1,14 @@
 local M = {}
 local utils = require("little-taskwarrior.utils")
 local tasks = require("little-taskwarrior.tasks")
-local ltw_urgency_hlnr = nil
 local urgent_lines = {}
 local not_urgent_lines = {}
+
 M.config = {
 	dashboard = {
 		limit = 5,
 		max_width = 30,
 		non_project_limit = 5,
-		use_colors = true,
 		columns = {
 			"id",
 			"project",
@@ -23,14 +22,13 @@ M.config = {
 		},
 	},
 	urgency_threshold = 8,
-}
-M.project = nil
-M.hl = {
-	urgency = {
-		bg = "#ff0000",
-		fg = "White",
+	highlight_groups = {
+		urgent = nil,
+		not_urgent = nil,
 	},
 }
+
+M.project = nil
 
 ---Check if the current buffor directroy contains a project.json, if so,
 ---it return project name
@@ -201,29 +199,57 @@ function M.get_lines()
 	return lines
 end
 
+--- Gets default highlight groups
+--- @param which string (urgent|not_urgent) group name
+--- @return table hl Highlight definition
+local function get_default_hl_group(which)
+	if which == "urgent" then
+		local hl = vim.api.nvim_get_hl(0, { name = "@keyword" })
+		return {
+			bg = hl.bg,
+			fg = hl.fg,
+			cterm = hl.cterm,
+			bold = hl.bold,
+			italic = hl.italic,
+			reverse = hl.reverse,
+		}
+	elseif which == "not_urgent" then
+		local hl = vim.api.nvim_get_hl(0, { name = "Comment" })
+		return {
+			bg = hl.bg,
+			fg = hl.fg,
+			cterm = hl.cterm,
+			bold = hl.bold,
+			italic = hl.italic,
+			reverse = hl.reverse,
+		}
+	else
+		return {
+			italic = true,
+		}
+	end
+end
+
 local function setup_hl_groups()
-	local hl = vim.api.nvim_get_hl(0, { name = "@keyword" })
-	vim.api.nvim_set_hl(0, "LTWDashboardHeaderUrgent", {
-		-- bg = "Yellow",
-		-- fg = "Red",
-		-- sp = "Yellow",
-		-- undercurl = true,
-		bg = hl.bg,
-		fg = hl.fg,
-		cterm = hl.cterm,
-		bold = hl.bold,
-		italic = hl.italic,
-		reverse = hl.reverse,
-	})
-	hl = vim.api.nvim_get_hl(0, { name = "Comment" })
-	vim.api.nvim_set_hl(0, "LTWDashboardHeader", {
-		bg = hl.bg,
-		fg = hl.fg,
-		cterm = hl.cterm,
-		bold = hl.bold,
-		italic = hl.italic,
-		reverse = hl.reverse,
-	})
+	local hl_urgent = nil
+	if M.config.highlight_groups and M.config.highlight_groups.urgent then
+		hl_urgent = M.config.highlight_groups.urgent
+	else
+		hl_urgent = get_default_hl_group("urgent")
+	end
+	if hl_urgent then
+		vim.api.nvim_set_hl(0, "LTWDashboardHeaderUrgent", hl_urgent)
+	end
+	local hl_not_urgent = nil
+
+	if M.config.highlight_groups and M.config.highlight_groups.not_urgent then
+		hl_not_urgent = M.config.highlight_groups.not_urgent
+	else
+		hl_not_urgent = get_default_hl_group("not_urgent")
+	end
+	if hl_not_urgent then
+		vim.api.nvim_set_hl(0, "LTWDashboardHeader", hl_not_urgent)
+	end
 end
 
 local function hl_tasks()

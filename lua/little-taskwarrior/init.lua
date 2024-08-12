@@ -13,8 +13,6 @@ M.config = {
 		max_width = 50,
 		--- if > 0 then  additional task (besides current project ones) will be added
 		non_project_limit = 5,
-		--- not used yet
-		use_colors = true,
 		--- List of columns to be displayed
 		columns = {
 			"id",
@@ -39,6 +37,10 @@ M.config = {
 	project_info = ".little-taskwarrior.json",
 	--- not uset yet (the idea is to mark task about this)
 	urgency_threshold = 8,
+	highlight_groups = {
+		urgent = nil,
+		not_urgent = nil,
+	},
 }
 
 ---Gets list of lines with tasks

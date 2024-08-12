@@ -56,8 +56,6 @@ M.config = {
   max_width = 50,
   --- if > 0 then  additional task (besides current project ones) will be added
   non_project_limit = 5,
-  --- not used yet
-  use_colors = true,
   --- List of columns to be displayed
   columns = {
    "id",
@@ -71,15 +69,27 @@ M.config = {
    ["work."] = "w.",
    ["personal."] = "p.",
   },
+  --- Section separator
+  sec_sep = ".",
+  --- Enable or disable section shortening
+  shorten_sections = true,
  },
  --- function to reload dashboard config
  get_dashboard_config = nil,
- --- toggle the loggin
+ --- toggle the logging
  debug = true,
  --- where information about taskwarrior project can be found
  project_info = ".little-taskwarrior.json",
- --- not used yet (the idea is to mark task about this)
+ --- above urgency_threshold all task could be highlighted in
+ --- the different way
  urgency_threshold = 9,
+ --- Highlights
+ highlight_groups ={
+    --- for the urgent tasks (above the threshold)
+    urgent = nil,
+    --- default style (highlight_groups) for tasks
+    not_urgnet =nil
+  }
 }
 ```
 
@@ -97,6 +107,148 @@ So for example to make the area of task list wider you can do:
   end,
 }
 ```
+
+### Dashboard
+
+This section sets how the dashboard's part will be displayed.
+
+#### Limit and Non_Project_Limit
+
+Those two options are used to display how many tasks will be displayed. Why two?
+It is connected to the `project_info` option and `.little-taskwarrior.json`
+file.
+
+If in the current folder there is no `.little-taskwarrior.json` file only
+`limit` will be taken. If the `.little-taskwarrior.json` is present the `limit`
+will be applied to the number of tasks in for that project and
+`non_project_limit` will be used for all others tasks.
+
+### Project file or not
+
+If in the folder (project folder or current folder) file named
+`.little-taskwarrior.json` exists. This plugin will try to read project name:
+
+For example:
+
+```json
+{
+  "project": "eos"
+}
+```
+
+If it succeeds it will use it as project name therefore the display mode will be
+switched to project specific mode. Which means the first task will be taken for
+that specific project. And then (if configuration allows) other tasks will be
+loaded. You can see this in [Tasks list with a project file](###Tasks list with a project file)
+
+### project_replacements and shorten_sections
+
+Those two options are use to format project names and they can be used together.
+
+- `project_replacements` - list of replacements for project names
+- `shorten_sections` - switches shortening of sections
+
+#### `project_replacements` example
+
+(because I like examples)
+
+Let's assume that we have projects related to `work` and several projects
+related to `personal`.
+In the `personal` project we have projects like:
+
+- `personal.dashboard-nvim`
+- `personal.little-taskwarrior`
+
+So task could look like this:
+
+```bash
+task add "I need to do something" project:personal.dashboard-nvim
+```
+
+But instead of displaying `personal.dashboard-nvim` we want to display
+`p.dashboard-nvim`
+
+Then we can add replacements in the configuration:
+
+```lua
+ project_replacements = {
+   ["work."] = "w.",
+   ["personal."] = "p.",
+  },
+```
+
+> [!note]
+> Replacements can by as regular expression
+
+#### 'shorten_sections' example
+
+So let's say that your projects hierarchy is much more complex (multi-levels):
+
+- personal.develop.ltw
+- personal.develop.nbd
+- personal.todos
+- personal.health.wo
+- personal.health.doc
+- personal.health.admin
+
+Of course you can `project_replacements` to make it more readable, but this
+approach will force you to add each project (subproject) manually.
+`shorten_sections` will do this job automatically. Before I will try explain how
+does it work look how previous list will look like:
+
+```txt
+- personal.develop.ltw  > p.d.ltw
+- personal.develop.nbd  > p.d.nbd
+- personal.todos        > p.todos
+- personal.health.wo    > p.h.wo
+- personal.health.doc   > p.h.doc
+- personal.health.admin > p.h.admin
+```
+
+So, each section but last will be shortened to the first letter, the last
+section will remain unchanged.
+
+### `urgency_threshold` and `highlight_groups`
+
+Those two options are used to highlight urgent tasks. The `urgency_threshold`
+set the threshold above which task is themed to be urgent. The task becomes
+urgent when `urgency >= urgency_threshold`.
+
+`highlight_groups` is used to set the style of the tasks. It has two keys:
+
+- `urgent` - style of urgent tasks
+- `not_urgent` - style of not urgent Tasks
+
+By **style** I mean vim's highlight. If `highlight_groups` is n t set the
+default values will be used.
+
+- `urgent` - based on default `@keyword` highlight
+- `not_urgent` - based on default `Comment` highlight
+
+You can see how they are defined in `dashboard.lua` in function: `get_default_hl_group`
+
+> [!note]
+> For unforeseen '**bug**' in the code, you can override single entries. For example:
+>
+> ```lua
+>  {
+>    "praczet/little-taskwarrior.nvim",
+>    config = function()
+>      require("little-taskwarrior").setup({
+>        dashboard = {
+>          max_width = 80
+>        }
+>        highlight_groups = {
+>          not_urgent = {
+>             italic=false,
+>          }
+>        }
+>      })
+>    end,
+>  }
+> ```
+
+This will just 'switch' off italic from default `Comment` highlight
 
 ## Usage
 
@@ -332,60 +484,9 @@ I suggest this (solution for LazyVim):
 
 You can see my config files in `config` folder of my repository.
 
-### Project file or not
-
-If in the folder (project folder or current folder) file named
-`.little-taskwarrior.json` exists. This plugin will try to read project name:
-
-For example:
-
-```json
-{
-  "project": "eos"
-}
-```
-
-If it succeeds it will use it as project name therefore the display mode will be
-switched to project specific mode. Which means the first task will be taken for
-that specific project. And then (if configuration allows) other tasks will be
-loaded. You can see this in [Tasks list with a project file](###Tasks list with a project file)
-
-### project_replacements
-
-This configuration requires a little explanation. The best explanation I can
-give will be by example.
-Let's assume that we have projects related to `work` and several projects
-related to `personal`.
-In the `personal` project we have projects like:
-
-- `personal.dashboard-nvim`
-- `personal.little-taskwarrior`
-
-So task could look like this:
-
-```bash
-task add "I need to do something" project:personal.dashboard-nvim
-```
-
-But instead of displaying `personal.dashboard-nvim` we want to display
-`p.dashboard-nvim`
-
-Then we can add replacements in the configuration:
-
-```lua
- project_replacements = {
-   ["work."] = "w.",
-   ["personal."] = "p.",
-  },
-```
-
-> [!note]
-> Replacements can by as regular expression
-
 ## TODO
 
-- [ ] feat: Shortening project names by separator
-- [ ] feat: List of task in Telescope
-- [ ] feat: Highlight urgent tasks
-- [ ] feat: Preview task
+- [x] feat: Shortening project names by separator
+- [x] feat: Highlight urgent tasks
+- [x] feat: Preview task
 - [ ] feat: Add task from selection or for current line
