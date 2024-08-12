@@ -2,13 +2,41 @@
 
 A little helper for displaying TaskWarrior's tasks.
 
+## Table of Contents
+
+<!-- mtoc-start -->
+
+* [Features](#features)
+* [Screens](#screens)
+  * [Tasks list without project file](#tasks-list-without-project-file)
+  * [Tasks list with a project file](#tasks-list-with-a-project-file)
+  * [Task list with my plugin next-birthday](#task-list-with-my-plugin-next-birthday)
+* [Installation](#installation)
+* [Dependency](#dependency)
+* [Configuration](#configuration)
+  * [Dashboard](#dashboard)
+    * [Limit and Non_Project_Limit](#limit-and-non_project_limit)
+  * [Project file or not](#project-file-or-not)
+  * [project_replacements and shorten_sections](#project_replacements-and-shorten_sections)
+    * [`project_replacements` example](#project_replacements-example)
+    * ['shorten_sections' example](#shorten_sections-example)
+  * [`urgency_threshold` and `highlight_groups`](#urgency_threshold-and-highlight_groups)
+* [Usage](#usage)
+  * [Integration with Dashboard-nvim](#integration-with-dashboard-nvim)
+    * [Static](#static)
+    * [Dynamic](#dynamic)
+      * [Workaround - a kind of solution](#workaround---a-kind-of-solution)
+* [TODO](#todo)
+
+<!-- mtoc-end -->
+
 ## Features
 
 For now this plugin offers the following features:
 
 - List of task as list of string to use in the Dashboard
-  - For current project and others
-  - Just a few most urgent tasks
+- For current project and others
+- Just a few most urgent tasks
 
 ## Screens
 
