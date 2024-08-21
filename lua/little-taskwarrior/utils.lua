@@ -143,9 +143,7 @@ function M.get_os_date(datetime_str, format_str)
 end
 
 function M.sort_by_column(tasks, column, order)
-	if order == nil then
-		order = "desc"
-	end
+	order = order or "desc"
 	table.sort(tasks, function(a, b)
 		if order == "desc" then
 			return a[column] > b[column]

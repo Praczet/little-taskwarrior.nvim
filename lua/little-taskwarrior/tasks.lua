@@ -1,11 +1,12 @@
 local M = {}
 local utils = require("little-taskwarrior.utils")
 M.config = {}
+local todo = {}
 
-local function get_urgnet(limit, project, exlude)
+local function get_urgnet(limit, project, exclude)
 	local prj_string = ""
 	if project ~= nil then
-		if exlude ~= nil and exlude == true then
+		if exclude ~= nil and exclude == true then
 			prj_string = "and project.not:" .. project
 		else
 			prj_string = "and project:" .. project
@@ -23,15 +24,66 @@ local function get_urgnet(limit, project, exlude)
 	end
 	local tasks = vim.fn.json_decode(result)
 	utils.sort_by_column(tasks, "urgency")
-	return utils.slice(tasks, 1, limit)
+	if limit > 0 then
+		return utils.slice(tasks, 1, limit)
+	end
+	return tasks
 end
 
 function M.tasks_get_urgent(limit, project, exclude)
-	local l_limit = M.config.dashboard.limit
-	if limit ~= nil and limit > 0 then
-		limit = l_limit
-	end
+	limit = limit or M.config.dashboard.limit
 	return get_urgnet(limit, project, exclude)
+end
+
+local function build_task_dict(tasks)
+	local task_dict = {}
+	for _, task in ipairs(tasks) do
+		task_dict[task.uuid] = task
+	end
+	return task_dict
+end
+
+local function find_root_tasks_depends(tasks)
+	-- local root_tasks = {}
+	-- for _, task in ipairs(tasks) do
+	-- 	if not task.depends or #task.depends == 0 then
+	-- 		table.insert(root_tasks, task)
+	-- 	end
+	-- end
+	-- return root_tasks
+	local is_dependent = {}
+
+	-- Mark all tasks that are dependencies
+	for _, task in ipairs(tasks) do
+		if task.depends then
+			for _, dep_id in ipairs(task.depends) do
+				is_dependent[dep_id] = true
+			end
+		end
+	end
+
+	-- Root tasks are those that are not marked as dependencies
+	local root_tasks = {}
+	for _, task in ipairs(tasks) do
+		if not is_dependent[task.uuid] then
+			table.insert(root_tasks, task)
+		end
+	end
+
+	return root_tasks
+end
+
+-- Recursive function to print tasks hierarchically
+local function add_todo(task, task_dict, indent)
+	indent = indent or 0
+	table.insert(todo, { indent = indent, task = task })
+	if task.depends then
+		for _, dep_id in ipairs(task.depends) do
+			if task_dict[dep_id] then
+				add_todo(task_dict[dep_id], task_dict, indent + 1)
+			end
+		end
+	end
 end
 
 local function setup_commands()
@@ -45,12 +97,6 @@ local function setup_commands()
 	vim.api.nvim_create_user_command("Task", function(opts)
 		require("little-taskwarrior.tasks").display_tasks(unpack(opts.fargs))
 	end, { nargs = "*" })
-end
-
-function M.setup(user_config)
-	utils.log_message("tasks.M.setup", "Setting up Tassks")
-	M.config = vim.tbl_deep_extend("force", M.config, user_config or {})
-	setup_commands()
 end
 
 function M.display_tasks(...)
@@ -97,6 +143,37 @@ function M.display_tasks(...)
 	})
 	-- Start insert mode in the terminal
 	vim.cmd("startinsert")
+end
+
+local function get_todo_depends(tasks)
+	local task_dict = build_task_dict(tasks)
+	local root_tasks = find_root_tasks_depends(tasks) or {}
+	todo = {}
+	for _, root_task in ipairs(root_tasks) do
+		add_todo(root_task, task_dict)
+	end
+	return todo
+end
+
+function M.get_todo(project, group_by, limit)
+	limit = limit or -1
+	group_by = group_by or "depends"
+	local tasks = M.tasks_get_urgent(limit, project)
+	if group_by == "depends" then
+		return get_todo_depends(tasks)
+	else
+		return {}
+	end
+end
+
+function M.test()
+	local tasks_todo = M.get_todo("personal")
+	print(vim.inspect(tasks_todo))
+end
+function M.setup(user_config)
+	utils.log_message("tasks.M.setup", "Setting up Tassks")
+	M.config = vim.tbl_deep_extend("force", M.config, user_config or {})
+	setup_commands()
 end
 
 return M

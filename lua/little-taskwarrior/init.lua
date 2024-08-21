@@ -43,14 +43,36 @@ M.config = {
 	},
 }
 
+local function setup_commands()
+	vim.api.nvim_create_user_command("Task2ToDo", function(opts)
+		require("little-taskwarrior").render_markdown_todos(unpack(opts.fargs))
+	end, { nargs = "*" })
+end
+
 ---Gets list of lines with tasks
 ---@return table Tasks list
 function M.get_dashboard_tasks()
 	return dashboard.get_lines()
 end
 
+function M.get_markdown_todos(project, group_by, limit)
+	local todos = tasks.get_todo(project, group_by, limit) or {}
+	local todos_lines = {}
+	for _, todo in ipairs(todos) do
+		table.insert(todos_lines, string.rep(" ", todo.indent * 2) .. "- [ ] " .. todo.task.description)
+	end
+	return todos_lines
+end
+
+function M.render_markdown_todos(project, group_by, limit)
+	local todos_lines = M.get_markdown_todos(project, group_by, limit)
+	local row, col = unpack(vim.api.nvim_win_get_cursor(0))
+	vim.api.nvim_buf_set_lines(0, row, row, true, todos_lines)
+	vim.api.nvim_win_set_cursor(0, { row + #todos_lines, col })
+end
+
 function M.test()
-	tasks.display_tasks()
+	print(table.concat(M.get_markdown_todos("personal", "depends"), "\n"))
 end
 
 function M.get_dashboard_config()
@@ -76,6 +98,7 @@ end
 ---Just adding log, if active for now this does nothing
 function M.initialize()
 	utils.log_message("init.M.initialize", "Initializing Little Taskwarrior") -- Debug print
+	setup_commands()
 end
 
 return M
