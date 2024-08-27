@@ -50,8 +50,9 @@ end
 ---@param width number max width that text can have
 ---@return string text Clipped text
 local function clip_text(text, width)
-	if #text > width then
-		text = text:sub(1, width - 3) .. "..."
+	local r_len = utils.utf8len(text)
+	if r_len > width then
+		text = text:sub(1, (width - r_len) - 4) .. "..."
 	end
 	return text
 end
@@ -70,9 +71,9 @@ local function parse_line(task, columnsWidth)
 		end
 		value = clip_text(value, width)
 		if column == "urgency" then
-			table.insert(line, string.format(sl .. "%" .. width .. "s", value))
+			table.insert(line, sl .. utils.align_right(value, width))
 		else
-			table.insert(line, string.format(sl .. "%-" .. width .. "s", value))
+			table.insert(line, sl .. utils.align_left(value, width))
 		end
 	end
 	return table.concat(line, "")
@@ -119,13 +120,13 @@ local function get_columns_width(task_list, other_tasks)
 		for _, task in ipairs(task_list) do
 			if task[column] ~= nil then
 				-- task = sanitize_task(task)
-				columnsWidth[column] = math.max(columnsWidth[column], #tostring(task[column]))
+				columnsWidth[column] = math.max(columnsWidth[column], utils.utf8len(tostring(task[column])))
 			end
 		end
 		for _, task in ipairs(other_tasks) do
 			if task[column] ~= nil then
 				-- task = sanitize_task(task)
-				columnsWidth[column] = math.max(columnsWidth[column], #tostring(task[column]))
+				columnsWidth[column] = math.max(columnsWidth[column], utils.utf8len(tostring(task[column])))
 			end
 		end
 		total_width = total_width + columnsWidth[column]

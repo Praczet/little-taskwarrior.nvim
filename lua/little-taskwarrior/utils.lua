@@ -87,6 +87,14 @@ function M.replace_project_name(project_name, config)
 	return project_name
 end
 
+function M.utf8len(str)
+	local len = 0
+	for _ in string.gmatch(str, "[%z\1-\127\194-\244][\128-\191]*") do
+		len = len + 1
+	end
+	return len
+end
+
 --- Slices a table from start index to end index
 ---@param tbl table The input table
 ---@param start_index number The starting index
@@ -131,6 +139,35 @@ function M.parse_datetime(datetime_str)
 	-- Convert the table to a timestamp
 	local timestamp = os.time(datetime_table)
 	return timestamp
+end
+
+function M.align_right(text, max_length)
+	local text_length = M.utf8len(text)
+	if text_length < max_length then
+		return string.rep(" ", max_length - text_length) .. text
+	else
+		return text
+	end
+end
+
+function M.align_left(text, max_length)
+	local text_length = M.utf8len(text)
+	if text_length < max_length then
+		return text .. string.rep(" ", max_length - text_length)
+	else
+		return text
+	end
+end
+
+function M.align_center(text, width)
+	local text_length = M.utf8len(text)
+	if text_length >= width then
+		return text
+	end
+	local padding = (width - text_length) / 2
+	local left_padding = math.floor(padding)
+	local right_padding = math.ceil(padding)
+	return string.rep(" ", left_padding) .. text .. string.rep(" ", right_padding)
 end
 
 function M.get_os_date(datetime_str, format_str)
