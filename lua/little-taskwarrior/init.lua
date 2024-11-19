@@ -55,6 +55,10 @@ function M.get_dashboard_tasks(maxwidth)
 	return dashboard.get_lines(maxwidth)
 end
 
+function M.get_snacks_dashboard_tasks(maxwidth, hl_normal, hl_overdue)
+	return dashboard.get_lines_for_snacks(maxwidth, hl_normal, hl_overdue)
+end
+
 function M.get_markdown_todos(project, group_by, limit)
 	local todos = tasks.get_todo(project, group_by, limit) or {}
 	local todos_lines = {}

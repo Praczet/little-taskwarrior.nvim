@@ -200,6 +200,56 @@ function M.get_lines(max_width)
 	return lines
 end
 
+function M.get_lines_for_snacks(max_width, hl_normal, hl_overdue)
+	utils.log_message("dashboard.M.get_lines", "Getting lines")
+	local lines = {}
+	local task_list, other_tasks = M.get_tasks()
+	local columnsWidth = get_columns_width(task_list, other_tasks, max_width)
+
+	for _, task in ipairs(task_list) do
+		local line = parse_line(task, columnsWidth)
+		local hl = hl_normal
+		utils.log_message("dashboard.M.get_lines", "task.urgency: " .. tonumber(task.urgency))
+		if
+			task.urgency ~= nil
+			and M.config.urgency_threshold ~= nil
+			and tonumber(task.urgency) >= M.config.urgency_threshold
+		then
+			utils.log_message("dashboard.M.get_lines", "Adding urgent line")
+			table.insert(urgent_lines, line)
+			hl = hl_overdue
+		else
+			utils.log_message("dashboard.M.get_lines", "Adding not urgent line")
+			table.insert(not_urgent_lines, line)
+		end
+		table.insert(lines, { line .. "\n", hl = hl })
+	end
+
+	if #other_tasks > 0 and M.project and #task_list > 0 then
+		table.insert(lines, { "--+--", hl = hl_normal, width = max_width - 1, align = "center" })
+		table.insert(lines, { "\n", hl = hl_normal })
+	end
+
+	for _, task in ipairs(other_tasks) do
+		local line = parse_line(task, columnsWidth)
+		local hl = hl_normal
+		utils.log_message("dashboard.M.get_lines", "task.urgency: " .. tonumber(task.urgency))
+		if
+			task.urgency ~= nil
+			and M.config.urgency_threshold ~= nil
+			and tonumber(task.urgency) >= M.config.urgency_threshold
+		then
+			utils.log_message("dashboard.M.get_lines", "Adding urgent line")
+			table.insert(urgent_lines, line)
+			hl = hl_overdue
+		else
+			utils.log_message("dashboard.M.get_lines", "Adding not urgent line")
+			table.insert(not_urgent_lines, line)
+		end
+		table.insert(lines, { line .. "\n", hl = hl })
+	end
+	return lines
+end
 --- Gets default highlight groups
 --- @param which string (urgent|not_urgent) group name
 --- @return table hl Highlight definition
