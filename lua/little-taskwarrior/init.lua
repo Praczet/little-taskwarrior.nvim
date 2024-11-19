@@ -51,8 +51,8 @@ end
 
 ---Gets list of lines with tasks
 ---@return table Tasks list
-function M.get_dashboard_tasks()
-	return dashboard.get_lines()
+function M.get_dashboard_tasks(maxwidth)
+	return dashboard.get_lines(maxwidth)
 end
 
 function M.get_markdown_todos(project, group_by, limit)

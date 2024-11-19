@@ -107,10 +107,10 @@ local function sanitize_tasks(task_list)
 	end
 end
 
-local function get_columns_width(task_list, other_tasks)
+local function get_columns_width(task_list, other_tasks, maxwidth)
 	utils.log_message("dashboard.get_columns_width", "Getting columns width")
 	local columnsWidth = {}
-	local max_width = M.config.dashboard.max_width
+	local max_width = maxwidth or M.config.dashboard.max_width
 	local needed_for_padding = #M.config.dashboard.columns
 	local total_width = 0
 	sanitize_tasks(task_list)
@@ -154,11 +154,11 @@ function M.get_tasks()
 	return main_tasts, other_tasks
 end
 
-function M.get_lines()
+function M.get_lines(max_width)
 	utils.log_message("dashboard.M.get_lines", "Getting lines")
 	local lines = {}
 	local task_list, other_tasks = M.get_tasks()
-	local columnsWidth = get_columns_width(task_list, other_tasks)
+	local columnsWidth = get_columns_width(task_list, other_tasks, max_width)
 
 	for _, task in ipairs(task_list) do
 		local line = parse_line(task, columnsWidth)
