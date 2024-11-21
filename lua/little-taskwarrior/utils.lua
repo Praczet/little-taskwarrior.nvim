@@ -22,20 +22,23 @@ function M.is_dashboard_open()
 	local buftype = vim.bo.filetype
 
 	-- Check if the buffer name contains 'dashboard' or filetype is 'dashboard'
-	if string.match(bufname, "dashboard") or buftype == "dashboard" then
+	if string.match(bufname, "dashboard") or buftype == "dashboard" or buftype == "snacks_dashboard" then
 		return true
 	end
-
 	return false
 end
 
 function M.refresh_dashboard()
-	if M.is_dashboard_open() and M.get_dashboard_config and type(M.get_dashboard_config) == "function" then
-		local bufnr = vim.api.nvim_get_current_buf()
-		vim.api.nvim_buf_delete(bufnr, { force = true })
-		local _dashboard = require("dashboard")
-		_dashboard.setup(M.get_dashboard_config())
-		_dashboard:instance()
+	if M.is_dashboard_open() then
+		if Snacks and Snacks.dashboard and type(Snacks.dashboard.update) == "function" then
+			Snacks.dashboard.update()
+		elseif M.get_dashboard_config and type(M.get_dashboard_config) == "function" then
+			local bufnr = vim.api.nvim_get_current_buf()
+			vim.api.nvim_buf_delete(bufnr, { force = true })
+			local _dashboard = require("dashboard")
+			_dashboard.setup(M.get_dashboard_config())
+			_dashboard:instance()
+		end
 	end
 end
 
